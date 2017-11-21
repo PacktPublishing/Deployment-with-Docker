@@ -1,0 +1,44 @@
+version: "3"
+services:
+  local-database:
+    image: local_database
+    networks:
+      - service_network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - database_volume:/data/db
+  application-server:
+    image: application_server
+    networks:
+      - service_network
+    depends_on:
+      - local-database
+    environment:
+      - DB_HOST=local-database
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+  web-server:
+    image: web_server
+    networks:
+      - service_network
+    ports:
+      - 8080:8080
+    depends_on:
+      - application-server
+    environment:
+      - APP_NAME=application-server
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+
+networks:
+  service_network:
+
+volumes:
+  database_volume:

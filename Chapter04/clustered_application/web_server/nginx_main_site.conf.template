@@ -1,0 +1,19 @@
+server {
+  listen         8080;
+  server_name    _;
+
+  resolver $DNS_RESOLVERS;
+
+  root /srv/www/html;
+
+  location ~/\. {
+    deny all;
+  }
+
+  location / {
+    auth_basic           "Authentication required";
+    auth_basic_user_file /srv/www/html/.htpasswd;
+
+    proxy_pass           http://$APP_NAME:8000;
+  }
+}

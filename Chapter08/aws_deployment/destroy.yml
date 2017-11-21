@@ -1,0 +1,74 @@
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  tasks:
+    - name: Finding VMs to delete
+      ec2_remote_facts:
+        region: "{{ aws_region }}"
+        filters:
+          "tag:Name": "cluster-node"
+      register: deletable_instances
+
+    - name: Deleting instances
+      ec2:
+        region: "{{ aws_region }}"
+        instance_ids: "{{ item.id }}"
+        state: absent
+        wait: yes
+        wait_timeout: 600
+      with_items: "{{ deletable_instances.instances }}"
+      when: deletable_instances is defined
+
+    # v2.0.0.2 doesn't have  ec2_vpc_net_facts so we have to fake it
+    - name: Finding route table info
+      ec2_vpc_route_table_facts:
+        region: "{{ aws_region }}"
+        filters:
+          "tag:Name": "Swarm Routing Table"
+      register: swarm_route_table
+
+    - set_fact:
+        vpc: "{{ swarm_route_table.route_tables[0].vpc_id }}"
+      when: swarm_route_table.route_tables | length > 0
+
+    - name: Removing security group
+      ec2_group:
+        region: "{{ aws_region }}"
+        name: "Swarm SG"
+        state: absent
+        description: ""
+        vpc_id: "{{ vpc }}"
+      when: vpc is defined
+
+    - name: Deleting gateway
+      ec2_vpc_igw:
+        region: "{{ aws_region }}"
+        vpc_id: "{{ vpc }}"
+        state: absent
+      when: vpc is defined
+
+    - name: Deleting subnet
+      ec2_vpc_subnet:
+        region: "{{ aws_region }}"
+        vpc_id: "{{ vpc }}"
+        cidr: "{{ swarm_vpc_cidr }}"
+        state: absent
+      when: vpc is defined
+
+    - name: Deleting route table
+      ec2_vpc_route_table:
+        region: "{{ aws_region }}"
+        vpc_id: "{{ vpc }}"
+        state: absent
+        lookup: tag
+        tags:
+          Name: "Swarm Routing Table"
+      when: vpc is defined
+
+    - name: Deleting VPC
+      ec2_vpc_net:
+        region: "{{ aws_region }}"
+        name: "Swarm VPC"
+        cidr_block: "{{ swarm_vpc_cidr }}"
+        state: absent

@@ -1,0 +1,61 @@
+---
+- name: Dist-upgrading the image
+  apt:
+    upgrade: dist
+    force: yes
+    dpkg_options: 'force-confold,force-confdef'
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Fixing ulimit through limits.d
+  copy:
+    src: "{{ item }}.conf"
+    dest: /etc/security/limits.d/90-{{ item }}.conf
+  with_items:
+    - ulimit-open-files-increase
+
+- name: Fixing ulimits through pam_limits
+  lineinfile:
+    dest: /etc/pam.d/common-session
+    state: present
+    line: "session required pam_limits.so"
+
+- name: Ensuring server-like settings
+  copy:
+    src: "{{ item }}.conf"
+    dest: /etc/sysctl.d/10-{{ item }}.conf
+  with_items:
+    - socket-buffers
+    - file-descriptor-increase
+    - conntrack
+
+# Bug: https://github.com/systemd/systemd/issues/1113
+- name: Working around netfilter loading order
+  lineinfile:
+    dest: /etc/modules
+    state: present
+    line: "{{ item }}"
+  with_items:
+    - nf_conntrack_ipv4
+    - nf_conntrack_ipv6
+
+- name: Increasing max connection buckets
+  command: echo '131072' > /sys/module/nf_conntrack/parameters/hashsize
+
+# Install Docker
+- name: Fetching Docker's GPG key
+  apt_key:
+    keyserver: hkp://pool.sks-keyservers.net
+    id: 58118E89F3A912897C070ADBF76221572C52609D
+
+- name: Adding Docker apt repository
+  apt_repository:
+    repo: 'deb https://apt.dockerproject.org/repo {{ ansible_distribution | lower }}-{{ ansible_distribution_release | lower }} main'
+    state: present
+
+- name: Installing Docker
+  apt:
+    name: docker-engine
+    state: installed
+    update_cache: yes
+    cache_valid_time: 3600

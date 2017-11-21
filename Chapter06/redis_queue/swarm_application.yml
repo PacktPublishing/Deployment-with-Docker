@@ -1,0 +1,39 @@
+version: "3"
+services:
+  queue-sender:
+    image: queue-worker
+    command: ["npm", "start", "sender"]
+    networks:
+      - queue_network
+    deploy:
+      replicas: 1
+    depends_on:
+      - redis-server
+    environment:
+      - QUEUE_HOST=redis-server
+
+  queue-receiver:
+    image: queue-worker
+    command: ["npm", "start", "receiver"]
+    networks:
+      - queue_network
+    deploy:
+      replicas: 1
+    depends_on:
+      - redis-server
+    environment:
+      - QUEUE_HOST=redis-server
+
+  redis-server:
+    image: redis
+    networks:
+      - queue_network
+    deploy:
+      replicas: 1
+    networks:
+      - queue_network
+    ports:
+      - 6379:6379
+
+networks:
+  queue_network:

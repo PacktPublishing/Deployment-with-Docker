@@ -1,0 +1,13 @@
+html
+  head
+    title Docker words
+  body
+    h1 Saved Words
+
+    form(method='POST' action='/new')
+        input.form-control(type='text', placeholder='New word' name='word')
+        button(type='submit') Save
+
+    ul
+        for word in words
+            li= word

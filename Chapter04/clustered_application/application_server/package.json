@@ -1,0 +1,13 @@
+{
+  "name": "application-server",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.4",
+    "mongodb": "^2.2.31",
+    "pug": "^2.0.0-rc.3"
+  }
+}

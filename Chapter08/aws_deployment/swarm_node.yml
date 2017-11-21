@@ -1,0 +1,8 @@
+---
+- name: Swarm node setup
+  hosts: all
+
+  become: True
+
+  roles:
+    - swarm_node

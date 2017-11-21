@@ -1,0 +1,30 @@
+{
+  "builders": [
+    {
+      "ami_description": "Cluster Node Image",
+      "ami_name": "cluster-node",
+      "associate_public_ip_address": true,
+      "force_delete_snapshot": true,
+      "force_deregister": true,
+      "instance_type": "m3.medium",
+      "region": "us-west-1",
+      "source_ami": "ami-1c1d217c",
+      "ssh_username": "ubuntu",
+      "tags": {
+        "Name": "cluster-node_{{ isotime \"2006-01-02_1504\" }}"
+      },
+      "type": "amazon-ebs"
+    }
+  ],
+  "provisioners": [
+    {
+      "inline": "sudo apt-get update && sudo apt-get install -y ansible",
+      "type": "shell"
+    },
+    {
+      "playbook_dir": ".",
+      "playbook_file": "swarm_node.yml",
+      "type": "ansible-local"
+    }
+  ]
+}
