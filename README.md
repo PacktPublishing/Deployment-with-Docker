@@ -1,5 +1,5 @@
 # Deployment with Doker
-This is the code repository for [Deployment with Doker](https://www.amazon.com/Deployment-Docker-Srdjan-Grubor/dp/1786469006/ref=sr_1_4?s=books&ie=UTF8&qid=1511333872&sr=1-4&keywords=deployment+with+docker). It contains all the supporting project files necessary to work through the book from start to finish.
+This is the code repository for [Deployment with Doker](https://www.packtpub.com/virtualization-and-cloud/deployment-docker). It contains all the supporting project files necessary to work through the book from start to finish.
 ## About the Book
 The course begins with a basic introduction to Docker, and explore our first Hello world! example. You then move on to Docker installation and more Hello world! examples on various platforms, and explore the Docker architecture and its major components such as the Docker Registry, Docker containers, and so on. Moving ahead, you will delve deeply into understanding Docker containers — one of the most important features in Docker. We also look at container and data management, customizing Docker images using Dockerfile, uploading images to the registry, and Dockerfile best practices. Along with learning Docker, you will also learn how Docker simplifies DevOps automation.
 ## Instructions and Navigation
